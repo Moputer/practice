@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="cn.itj.ssm.mapper.AdminMapper">
+	<select id="findByUsername"
+			resultType="cn.itj.ssm.dao.Admin">
+		SELECT
+			id, username,
+			password
+		FROM
+			admin
+		WHERE
+			username=#{username}
+	</select>
+	<insert id="addAdmin">
+		INSERT into admin
+			(username,password,phone)
+		VALUES
+			(#{username},#{password},#{phone})
+	</insert>
+
+	<select id="findAll" resultType="cn.itj.ssm.dao.User">
+		SELECT
+			student_id AS studentId,name,
+			gender,age,major
+		FROM student
+		<where>
+			<if test="studentId!=null and studentId!='' ">
+				student_id=#{studentId}
+			</if>
+			<if test="name!=null and name!=''">
+				AND name LIKE '%${name}%'
+			</if>
+			<if test="major!=null and major!=''">
+				AND major LIKE '%${major}%'
+			</if>
+			<if test="age!=null and age!=''">
+				AND age=#{age}
+			</if>
+			<if test="gender!=null and gender!=''">
+				AND gender=#{gender}
+			</if>
+		</where>
+		LIMIT #{currentPage},5
+	</select>
+
+	<select id="findNumber" resultType="java.lang.Integer">
+	SELECT
+	count(student_id) as number
+	FROM student
+		<where>
+			<if test="studentId!=null and studentId!='' ">
+				student_id=#{studentId}
+			</if>
+			<if test="name!=null and name!=''">
+				AND name LIKE '%${name}%'
+			</if>
+			<if test="major!=null and major!=''">
+				AND major LIKE '%${major}%'
+			</if>
+			<if test="age!=null and age!=''">
+				AND age=#{age}
+			</if>
+			<if test="gender!=null and gender!=''">
+				AND gender=#{gender}
+			</if>
+		</where>
+	</select>
+
+	<!--Integer createStudent(ScoreVO scoreVO);
+	添加学生-->
+	<insert id="createStudent">
+		INSERT INTO student
+			(student_id,name,gender,age,major,phone)
+		VALUES
+			(#{studentId},#{name},#{gender},#{age},#{major},#{phone})
+	</insert>
+	<!--Integer createScore(ScoreVO scoreVO);
+	添加学生-->
+	<insert id="createScore">
+		INSERT INTO score
+			(id,music,dance,mission,education,drawing,mentality)
+		VALUES
+			(#{studentId},#{music},#{dance},#{mission},#{education},#{drawing},#{mentality})
+	</insert>
+<!--根据student_id查找student_id-->
+	<select id="findByStudentId" resultType="java.lang.Integer">
+		SELECT student_id AS studentId from student WHERE student_id=#{studentId}
+	</select>
+
+	<delete id="delByStudentId">
+		delete FROM student
+		WHERE student_id=#{studentId}
+	</delete>
+<!--void delScore(Integer studentId);-->
+	<delete id="delScore">
+		delete FROM score
+		WHERE id=#{studentId}
+	</delete>
+	<update id="reviseStudent">
+		UPDATE
+		    student
+		SET
+		    student_id=#{studentId},name=#{name},gender=#{gender},age=#{age},major=#{major}
+		WHERE
+		    student_id=#{studentId}
+	</update>
+	<!--修改分数-->
+	<update id="updateScore">
+		UPDATE
+		    score
+		SET
+		    music=#{music},mission=#{mission},mentality=#{mentality},
+		    education=#{education},drawing=#{drawing},dance=#{dance}
+		WHERE
+		    id=#{id}
+	</update>
+
+	<!--findForLoading 加载修改页面-->
+	<select id="findForLoading" resultType="cn.itj.ssm.dao.User">
+		SELECT
+			student_id AS studentId,name,
+			gender,age,major
+		FROM student
+		where
+		student_id=#{studentId}
+	</select>
+
+	<select resultType="cn.itj.ssm.dao.ScoreVO" id="detailsLoading">
+		SELECT
+			student_id AS studentId,name,
+			gender,age,major,phone,
+			music,dance,mission,education,drawing,mentality
+		FROM student s,score
+		WHERE s.student_id=score.id AND s.student_id=#{studentId}
+	</select>
+
+	<!--查询一共几条数据-->
+	<select id="findTotal" resultType="java.lang.Integer">
+        select count(student_id) from
+        student
+    </select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+

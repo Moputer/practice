@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改学生</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<style type="text/css">
+
+</style>
+<body>
+<form id="form-revise">
+
+</form>
+</body>
+<script type="text/javascript">
+    $(document).ready(function() {
+        loading();
+    });
+    function oneValues(){
+        var result;
+        var url=window.location.search; //获取url中"?"符后的字串
+        if(url.indexOf("?")!=-1){
+            result = url.substr(url.indexOf("=")+1);
+        }
+        return result;
+    }
+function loading(){
+    student_id = oneValues();
+    console.log(student_id)
+    var url = "/reviseloading?studentId="+student_id;
+    //var data = $("#form-revise").serialize();
+    //console.log(data);
+    $.ajax({
+        "url": url,
+        //"data": data,
+        "type": "GET",
+        "dataType": "json",
+        "success": function(json) {
+            console.log(json)
+            var html1='<tr><td><input type="checkbox" name="productbox" id="selectAllproduct" style="margin:8px" onclick="selectAll(this)"></td><td>学号</td><td>姓名</td><td>年龄</td><td>性别</td><td>专业</td><td>操作</td></tr>'
+            if (json.state == 200) {
+                var html = '学号:' +
+                    '<input type="text" name="studentId" value="#{studentId}" id="studentId" onchange="IsInteger(this)" readonly="readonly"><br>'+
+                    '姓名:<input type="text" name="name" value="#{name}"><br>'+
+                    '性别:<input type="radio" name="gender" value="1" checked id="gender">男'+
+                    '<input type="radio" name="gender" value="0">女<br>'+
+                    '年龄:<input type="text" name="age" value="#{age}" id="age" onchange="IsInteger(this)"><br>'+
+                    '专业:<input type="text" name="major" value="#{major}"><br>'+
+                    '<input type="button" onclick="revise()" value="修改">';
+                html = html.replace(/#{studentId}/g, json.data.studentId);
+                html = html.replace(/#{name}/g, json.data.name);
+                html = html.replace(/#{age}/g, json.data.age);
+                if (json.data.gender) {
+                    html = html.replace(/#{gender}/g, '男');
+                }else{
+                    html = html.replace(/#{gender}/g, '女');
+                }
+                html = html.replace(/#{major}/g, json.data.major);
+                $("#form-revise").append(html);
+            } else {
+                alert(json.message);
+            }
+        }
+    });
+}
+
+    function IsInteger(thisdoc){
+        console.log(thisdoc)
+        var str = document.getElementById(thisdoc.id).value.trim();
+        if(str.length!=0){
+            reg=/^[-+]?\d*$/;
+            if(!reg.test(str)){
+                    alert("输入内容不合法");//请将“整数类型”要换成你要验证的那个属性名称！
+                    $("#" + thisdoc.id).val("");
+                    return;
+            }else{
+                if (thisdoc.value<0){alert("数字不合法");}
+            }
+        }else{alert("不能为空");$("#" + thisdoc.id).val("");}
+    }
+    function revise(){
+        var url = "/revise";
+        var data = $("#form-revise").serialize();
+        console.log(data);
+        $.ajax({
+            "url": url,
+            "data": data,
+            "type": "GET",
+            "dataType": "json",
+            "success": function(json) {
+                if (json.state == 200) {
+                    console.log("修改成功");
+                    location.href = "index.html";
+                } else {
+                    alert(json.message);
+                }
+            }
+        });
+    };
+</script>
+</html>

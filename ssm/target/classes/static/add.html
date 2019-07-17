@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加学生</title>
+</head>
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+
+<body>
+<div>添加</div>
+<div id="all">
+<form id="form-add">
+    学号:<input type="text" name="studentId" id="studentId" onchange="IsInteger(this.id)"><br>
+    姓名:<input type="text" name="name"><br>
+
+    性别:<input type="radio" name="gender" value="男" checked id="gender">男
+    <input type="radio" name="gender" value="女">女<br>
+    年龄:<input type="text" name="age" id="age" onchange="IsInteger(this.id)"><br>
+    专业:<input type="text" name="major"><br>
+    电话:<input type="text" name="phone" id="phone" onchange="IsInteger(this.id)"><br>
+
+    成绩:声乐<input type="text" name="music" id="music" onchange="IsInteger(this.id)"><br>
+    绘画<input type="text" name="drawing" id="drawing" onchange="IsInteger(this.id)"><br>
+    美声<input type="text" name="mission" id="mission" onchange="IsInteger(this.id)"><br>
+    舞蹈<input type="text" name="dance" id="dance" onchange="IsInteger(this.id)"><br>
+    心理<input type="text" name="mentality" id="mentality" onchange="IsInteger(this.id)"><br>
+    教育<input type="text" name="education" id="education" onchange="IsInteger(this.id)"><br>
+    <input type="button" id="add" value="添加">
+</form>
+</div>
+</body>
+<script type="text/javascript">
+    /*正则验证*/
+    function IsInteger(id){
+        var str = document.getElementById(id).value.trim();
+        if(str.length!=0){
+            reg=/^[-+]?\d*$/;
+            if(!reg.test(str)){
+                alert("对不起，请您输入数字!");//请将“整数类型”要换成你要验证的那个属性名称！
+                $("#"+id).val("");
+                return;
+            }else{}
+        }
+    }
+
+    $("#add").click(function() {
+        var url = "/add";
+        var data = $("#form-add").serialize();
+
+        console.log(data);
+        $.ajax({
+            "url": url,
+            "data": data,
+            "type": "GET",
+            "dataType": "json",
+            "success": function(json) {
+                if (json.state == 200) {
+                    console.log("添加成功");
+                    location.href = "index.html";
+                } else {
+                    alert(json.message);
+                }
+            }
+        });
+    });
+
+
+</script>
+</html>

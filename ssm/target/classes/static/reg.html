@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+
+</head>
+
+<body>
+<form id="form-reg" role="form">
+    <!--用户名-->
+    <div>
+        <label>名字：</label>
+        <div>
+            <input type="text" value="" name="username" placeholder="请输入用户名" id="username" onchange="IsInteger(this.id)">
+        </div>
+    </div>
+    <!--密码-->
+    <div >
+        <label > 密码：</label>
+        <div>
+            <input type="text" name="password" placeholder="请输入密码" id="password" onchange="IsInteger(this.id)">
+        </div>
+
+    </div>
+    <label > 电话：</label>
+    <div>
+        <input type="text" name="phone" placeholder="请输入电话" id="phone" onchange="IsInteger(this.id)">
+    </div>
+    <label > 身份证号：</label>
+    <div>
+        <input type="text" name="idnumber" placeholder="请输入身份证号" id="idnumber" onchange="IsInteger(this.id)">
+    </div>
+    <!--提交按钮-->
+    <div>
+
+        <div>
+            <input id="btn-reg" type="button" value="立即注册" />
+
+            <span class="pull-right"><small>已经有账号？</small><a href="login.html">登录</a></span>
+        </div>
+    </div>
+</form>
+</body>
+<script type="text/javascript">
+    $("#btn-reg").click(function() {
+        var url = "/reg";
+        var data = $("#form-reg").serialize();
+        $.ajax({
+            "url": url,
+            "data": data,
+            "type": "POST",
+            "dataType": "json",
+            "success": function(json) {
+                if (json.state == 200) {
+                    alert("注册成功！");
+                    location.href = "login.html";
+                } else {
+                    alert(json.message);
+                }
+            }
+        });
+    });
+
+
+    function IsInteger(id){
+        var str = document.getElementById(id).value.trim();
+        if (str.length == 0) {alert("不能空");$("#" + id).val("");return;}
+        if (id=="password"){
+                reg = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? ]).*$/;
+                if (!reg.test(str)) {
+                    alert("密码强度不够，最少6位，包括至少1个大写字母，1个小写字母，1个数字，1个特殊字符");
+                    $("#" + id).val("");
+                    return;
+                }
+        }else if (id=="username") {
+                reg = /^[a-zA-Z0-9_-]{4,16}$/;
+                if (!reg.test(str)) {
+                    alert("对不起，请您输入4~16位字母，数字，下划线，减号!");
+                    $("#" + id).val("");
+                    return;
+                }
+        }else if (id=="phone"){
+                reg = /^1[34578]\d{9}$/;
+                if (!reg.test(str)) {
+                    alert("对不起，请您输入正确手机号!");
+                    $("#" + id).val("");
+                    return;
+                }
+        } else if (id=="idnumber"){
+                reg = /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
+                if (!reg.test(str)) {
+                    alert("对不起，请您输入正确身份证号!");
+                    $("#" + id).val("");
+                    return;
+                }
+        }
+    }
+</script>
+</html>

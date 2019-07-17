@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>详情</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<style>
+    #all{
+        width: 300px;
+        /*margin: 700px auto;*/
+    }
+    
+</style>
+</head>
+<body>
+<div id="all">
+    <table id="tab"></table>
+    <form id="from-course">
+    <table id="tab1"></table>
+        <input type="button" onclick="change()" value="修改">
+    </form>
+</div>
+</body>
+<script type="text/javascript">
+
+    /*正则验证*/
+    function IsInteger(thisdoc){
+        console.log(thisdoc)
+        var str = document.getElementById(thisdoc.id).value.trim();
+        if(str.length!=0){
+            reg=/^[-+]?\d*$/;
+            if(reg.test(str)&&thisdoc.value<=100&&thisdoc.value>=0){
+
+            }else{
+                {alert("请输入0~100的分数");$("#"+thisdoc.id).val(0);}
+            }
+        }else{alert("请输入0~100的分数");$("#"+thisdoc.id).val(0);}
+    }
+
+    /*获取url参数*/
+    function oneValues(){
+        var result;
+        var url=window.location.search; //获取url中"?"符后的字串
+        if(url.indexOf("?")!=-1){
+            result = url.substr(url.indexOf("=")+1);
+        }
+        return result;
+    }
+    /*页面启动时加载*/
+    $(document).ready(function() {
+        detailsloading();
+    });
+
+    function detailsloading() {
+        $("#tab").empty();
+        var stidentId=oneValues();
+        console.log(stidentId)
+        var url = "/details?studentId="+stidentId;
+        $.ajax({
+            "url": url,
+            "type": "GET",
+            "dataType": "json",
+            "success": function(json) {
+                console.log(json)
+                if (json.state == 200) {
+                    var html = '<tr>'+
+                        '<td>学号:</td><td>#{studentId}</td></tr>'+
+                        '<tr><td>姓名:</td><td>#{name}</td></tr>'+
+                        '<tr><td>年龄:</td><td>#{age}</td></tr>'+
+                        '<tr><td>性别:</td><td>#{gender}</td></tr>'+
+                        '<tr><td>专业:</td><td>#{major}</td></tr>'+
+                        '<tr><td>电话:</td><td>#{phone}</td>'+
+                        '</tr>';
+                    html = html.replace(/#{studentId}/g, json.data.studentId);
+                    html = html.replace(/#{name}/g, json.data.name);
+                    html = html.replace(/#{age}/g, json.data.age);
+                    html = html.replace(/#{gender}/g, json.data.gender);
+                    html = html.replace(/#{major}/g, json.data.major);
+                    html = html.replace(/#{phone}/g, json.data.phone);
+                    $("#tab").append(html);
+
+                    var html1='<tr>\n' +
+                        '        <th>声乐</th>\n' +
+                        '        <th>绘画</th>\n' +
+                        '        <th>美声</th>\n' +
+                        '        <th>舞蹈</th>\n' +
+                        '        <th>心理</th>\n' +
+                        '        <th>教育</th>\n' +
+                        '        <th>总分</th>\n' +
+                        '    </tr>\n' +
+                        '    <tr>\n' +
+
+                        '        <td><input style="width:20px"; id="music" onchange="IsInteger(this)" name="music" type="text" value="#{music}"></td>\n' +
+                        '        <td><input style="width:20px"; id="drawing" onchange="IsInteger(this)" name="drawing" type="text" value="#{drawing}"></td>\n' +
+                        '        <td><input style="width:20px"; id="mission" onchange="IsInteger(this)" name="mission" type="text" value="#{mission}"></td>\n' +
+                        '        <td><input style="width:20px"; id="dance" onchange="IsInteger(this)" name="dance" type="text" value="#{dance}"></td>\n' +
+                        '        <td><input style="width:20px"; id="education" onchange="IsInteger(this)" name="education" type="text" value="#{education}"></td>\n' +
+                        '        <td><input style="width:20px"; id="mentality" onchange="IsInteger(this)" name="mentality" type="text" value="#{mentality}"></td>\n' +
+                        '        <td>#{all}</td></tr>';
+
+                    html1 = html1.replace(/#{music}/g, json.data.music==null?0:json.data.music);
+                    html1 = html1.replace(/#{drawing}/g, json.data.drawing==null?0:json.data.drawing);
+                    html1 = html1.replace(/#{mission}/g, json.data.mission==null?0:json.data.mission);
+                    html1 = html1.replace(/#{dance}/g, json.data.dance==null?0:json.data.dance);
+                    html1 = html1.replace(/#{mentality}/g, json.data.mentality==null?0:json.data.mentality);
+                    html1 = html1.replace(/#{education}/g, json.data.education==null?0:json.data.education);
+                    html1 = html1.replace(/#{all}/g, json.data.mentality+json.data.music+json.data.drawing+json.data.mission+json.data.dance+json.data.education);
+                    $("#tab1").append(html1);
+                } else {
+                    alert(json.message);
+                }
+                }
+
+        });
+    }
+    function change(course) {
+        var url = "/updatecouese";
+        var id=oneValues();
+        var data =$.param({"id" : id}) + "&" +$("#from-course").serialize();
+
+        console.log(data);
+        $.ajax({
+            "url": url,
+            "data": data,
+            "type": "GET",
+            "dataType": "json",
+            "success": function(json) {
+                if (json.state == 200) {
+                    alert("修改成功");
+                    location.href = "index.html";
+                } else {
+                    alert(json.message);
+                }
+            }
+        });
+    }
+</script>
+</html>

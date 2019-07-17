@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <style type="text/css">
+        #all{
+            text-align: center;
+            height: 700px;
+            width: 500px;
+            border: rgba(255, 111, 0, 0.3);
+            margin: 0 auto;
+        }
+        table{
+            border-style: solid;
+            border-color: black;
+            margin: 50px auto;
+        }
+    </style>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+
+</head>
+<body>
+<form id="condition">
+    学号:<input type="text" id="studentId" name="studentId" onchange="IsInteger(this)">
+    |姓名:<input type="text" id="name" name="name">
+    |性别:<select id="gender" name="gender">
+    <option value ="">未选择</option>
+    <option value ="男">男</option>
+    <option value="女">女</option>
+</select>
+    |年龄<input type="text" id="age" name="age" onchange="IsInteger(this)">
+    |专业<input type="text" id="major" name="major">
+    <input type="button" value="搜索" onclick="num(),page(1)">
+</form>
+<div id="all">
+    <div id="header">
+        <div>学生管理
+            <a href="add.html">てんぷ</a>
+        </div>
+            <table id="tab">
+
+            </table>
+        <input type="button" value="批量删除" onclick="delsome()"/>
+    </div>
+    <div id="pagediv">
+    <input type="button" value="<" onclick="pageadd('-')">
+        <input id="cpage" style="width: 20px" type="text" value="1" onchange="page(this.value)">
+        /<input id="cpage1" style="width: 20px" type="text" readonly="readonly">
+        <input style="width: 20px" type="button" value=">" onclick="pageadd('+')">
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    /*页面启动时执行函数*/
+    $(document).ready(function() {
+        //初始化总页数
+        num();
+        //初始化页面
+        page(1);
+        //初始化value
+    });
+    /*!!!!!!!!!!!!!!!!!分页!!!!!!!!!!!!!!!!!!!!!!*/
+    //初始化总页数
+    function num() {
+
+        var data=$("#condition").serialize();
+        $.ajax({
+            "url": "/num",
+            "data":data,
+            "type": "GET",
+            "dataType": "json",
+            "success": function (json) {
+                if (json.state == 200) {
+                    $("#cpage1").val(json.data);
+                    $("#cpage").val(1);
+                } else {
+                    alert(json.message);
+                }
+            }
+        });
+    }
+    function pageadd(symbol) {
+        var currentPage=$("#cpage").val();
+        if (symbol=='+'){
+            currentPage=parseInt(currentPage) + 1
+        } if (symbol=='-'){
+            currentPage=parseInt(currentPage) - 1
+        }
+        $('#cpage').val(currentPage);
+        $("#cpage1").val();
+        currentPage=pageverify();
+        page(currentPage);
+    }
+    /*判断页数是否合法*/
+    /*输入框数字改变时调用*/
+    /*加减页数时调用*/
+    function pageverify(){
+        var currentPage=$('#cpage').val();
+        var totalPages=$("#cpage1").val();
+        console.log(currentPage);
+        if (currentPage < 1) {
+            currentPage=1;
+            $('#cpage').val(currentPage);
+        }if (currentPage>=totalPages){
+            currentPage=totalPages;
+            $('#cpage').val(currentPage);
+        }
+        return currentPage;
+    }
+    /*!!!!!!!!!!!!!!!!!!分页!!!!!!!!!!!!!!!!!!!!!!!!*/
+    /*验证*/
+    function IsInteger(thisdoc){
+        console.log(thisdoc)
+        var str = document.getElementById(thisdoc.id).value.trim();
+        if(str.length!=0){
+            reg=/^[-+]?\d*$/;
+            if(!reg.test(str)){
+                    alert("输入内容不合法");//请将“整数类型”要换成你要验证的那个属性名称！
+                    $("#" + thisdoc.id).val("");
+                    return;
+
+            }else{
+                if (thisdoc.value<0){alert("数字不合法");}
+            }
+        }else{//alert("不能为空");$("#" + thisdoc.id).val("");
+             }
+    }
+    /*页面启动时加载学生数据*/
+    /*搜索时调用*/
+    function page(currentPage) {
+        if(currentPage.length!=0){
+            reg=/^[-+]?\d*$/;
+            if(!reg.test(currentPage)){
+                alert("对不起，请您输入数字!");//请将“整数类型”要换成你要验证的那个属性名称！
+                $("#cpage").val(1);
+                currentPage=1;
+            }
+        }
+        if (currentPage<1) currentPage=1;
+        console.log("总页:"+$('#cpage1').val()+"页");
+        //if (currentPage>$('#cpage1').val()) currentPage=$('#cpage1').val();
+        $("#tab").empty();
+        pageverify();
+        var data = $.param({"currentPage" : currentPage}) + "&" +$("#condition").serialize();
+        var url = "/index";
+        $.ajax({
+            "url": url,
+            "type": "GET",
+            "dataType": "json",
+            "data":data,
+            "success": function(json) {
+
+                var list = json.data;
+                console.log("list.length=" + list.length);
+                var html1='<tr>' +
+                    '<td><input type="checkbox" name="productbox" id="selectAllproduct" style="margin:8px" onclick="selectAll(this)"></td><td name="studentId">学号</td><td>姓名</td><td>年龄</td><td>性别</td><td>专业</td><td>操作</td></tr>'
+                $("#tab").append(html1);
+                for (var i = 0; i < list.length; i++) {
+                    var html = '<tr>'+
+                        '<td><input type="checkbox" name="productbox" style="margin:8px"></td>'+
+                        '<td name="studentId">#{studentId}</td>'+
+                        '<td>#{name}</td>'+
+                        '<td>#{age}</td>'+
+                        '<td>#{gender}</td>'+
+                        '<td>#{major}</td>'+
+                        '<td><input type="button" onclick="delStudent(#{studentId})" value="删除" >'+
+                        '<a href="revise.html?student_id=#{studentId}">修改</a>'+
+                        '<a href="details.html?student_id=#{studentId}">详情</a></td>'+
+                        '</tr>';
+
+                    html = html.replace(/#{studentId}/g, list[i].studentId);
+                    html = html.replace(/#{name}/g, list[i].name);
+                    html = html.replace(/#{age}/g, list[i].age);
+
+                    if (list[i].gender==0){html = html.replace(/#{gender}/g, "女");}
+                    else if (list[i].gender==1){html = html.replace(/#{gender}/g, "男");}
+                    else{html = html.replace(/#{gender}/g, list[i].gender);}
+                    html = html.replace(/#{major}/g, list[i].major);
+
+                    $("#tab").append(html);
+                }
+                if (list.length == 0) {
+                    if(confirm("当前页没有数据是否跳转到添加页面?")){
+                        location.href="add.html";
+                    }else {
+                        location.href = "index.html";
+                    }
+                }
+            }
+        });
+    }
+
+    /*批量删除*/
+    function delsome(){
+        var obj = document.getElementsByName("productbox");//选择所有name="interest"的对象，返回数组
+        var obj1 = document.getElementsByName("studentId");
+        var arr=new Array();
+        /*获取选中数据*/
+        for(var i=0;i<obj.length;i++){
+            if(obj[i].checked&&obj1[i+1].innerText!='学号'){//取到对象数组后，我们来循环检测它是不是被选中
+                arr.push(obj1[i+1].innerText);
+            }
+        }
+        console.log("arr:"+arr);
+        //批量删除ajax
+        var url = "/delsome";
+        if (arr!=null&&arr!=''&& arr!=undefined) {
+            var r=confirm("您确定要批量删除学生?")
+            if (r==true) {
+                $.ajax({
+                    "url": url,
+                    "data": {
+                        arr: arr
+                    },
+                    "type": "POST",
+                    "dataType": "json",
+                    "success": function (json) {
+                        if (json.state == 200) {
+                            console.log("删除成功");
+                            num();
+                            page(1);
+                            //location.href = "index.html";
+                        } else {
+                            alert(json.message);
+                        }
+                    }
+                });
+            }else{return;}
+        }
+    }
+
+
+
+    /*删除学生*/
+    function delStudent(studentId){
+        var r=confirm("您确定要删除学号:"+studentId+"?")
+        if (r==true){
+        var url = "/delstudent?studentId="+studentId;
+        $.ajax({
+            "url": url,
+            "type": "GET",
+            "dataType": "json",
+            "success": function(json) {
+                num();
+                page(1);
+                console.log('删除成功');
+            },
+            "error":function (json) {
+                alert(json.message);
+            }
+        })
+        }else {return;}
+    }
+    /*全选选中函数*/
+      function selectAll(a){
+        var arr=new Array();
+          var type = a.checked;  //选中：type=true; 取消选中：type=false
+          $("#tab input[name='productbox']").each(function() {
+              $(this).prop("checked", type); //相关该被选中的内容全部同步选中
+          });
+          return
+      }
+</script>
+</html>

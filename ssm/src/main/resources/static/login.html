@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+
+</head>
+
+<body>
+<form id="form-login" role="form">
+    <!--用户名-->
+        <label>名字：</label>
+            <input type="text" name="username" placeholder="请输入用户名">
+    <!--密码-->
+        <label > 密码：</label>
+            <input type="text" name="password" placeholder="请输入密码">
+    <!--提交按钮-->
+            <input id="btn-login" type="button" value="立即登录" />
+            <span><a href="reg.html">注册</a></span>
+</form>
+</body>
+<script type="text/javascript">
+    $("#btn-login").click(function() {
+        var url = "/login";
+        var data = $("#form-login").serialize();
+        $.ajax({
+            "url": url,
+            "data": data,
+            "type": "POST",
+            "dataType": "json",
+            "success": function(json) {
+                if (json.state == 200) {
+                    alert("登录成功！");
+                    location.href = "index.html";
+                } else {
+                    alert(json.message);
+                }
+            }
+        });
+    });
+</script>
+</html>
